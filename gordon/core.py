@@ -15,10 +15,10 @@ from clint.textui import colored, puts, indent
 from botocore.exceptions import ClientError
 
 # from . import exceptions
-from . import utils
-from . import actions
-from . import resources
-from . import protocols
+# from . import utils
+# from . import actions
+# from . import resources
+# from . import protocols
 
 SETTINGS_FILE = 'settings.yml'
 
@@ -41,16 +41,16 @@ AWS_LAMBDA_REGIONS = (
     'sa-east-1',  # South America (Sao Paulo)
 )
 
-AVAILABLE_RESOURCES = {
-    'lambdas': resources.lambdas.Lambda,
-    'dynamodb': resources.dynamodb.Dynamodb,
-    'kinesis': resources.kinesis.Kinesis,
-    's3': resources.s3.BucketNotificationConfiguration,
-    'events': resources.events.CloudWatchEvent,
-    'vpcs': resources.vpcs.Vpc,
-    'contexts': resources.contexts.LambdasContexts,
-    'apigateway': resources.apigateway.ApiGateway
-}
+# AVAILABLE_RESOURCES = {
+#     'lambdas': resources.lambdas.Lambda,
+#     'dynamodb': resources.dynamodb.Dynamodb,
+#     'kinesis': resources.kinesis.Kinesis,
+#     's3': resources.s3.BucketNotificationConfiguration,
+#     'events': resources.events.CloudWatchEvent,
+#     'vpcs': resources.vpcs.Vpc,
+#     'contexts': resources.contexts.LambdasContexts,
+#     'apigateway': resources.apigateway.ApiGateway
+# }
 
 
 class BaseResourceContainer(object):
@@ -98,11 +98,11 @@ class App(BaseResourceContainer):
         self.path = path or os.path.join(self.project.path, name)
         # if not os.path.exists(self.path):
         #     raise exceptions.AppNotFoundError(self.name, self.path)
-        self.settings = utils.load_settings(
-            os.path.join(self.path, SETTINGS_FILE),
-            default=self.DEFAULT_SETTINS,
-            protocols=protocols.BASE_BUILD_PROTOCOLS
-        )
+        # self.settings = utils.load_settings(
+        #     os.path.join(self.path, SETTINGS_FILE),
+        #     default=self.DEFAULT_SETTINS,
+        #     protocols=protocols.BASE_BUILD_PROTOCOLS
+        # )
         self.settings.update(settings or {})
         super(App, self).__init__(*args, **kwargs)
 
@@ -119,11 +119,11 @@ class BaseProject(object):
         self.debug = kwargs.pop('debug', False)
         self.build_path = os.path.join(self.path, '_build')
         self.root = os.path.dirname(os.path.abspath(__file__))
-        self.settings = utils.load_settings(
-            os.path.join(self.path, SETTINGS_FILE),
-            default=self.DEFAULT_SETTINS,
-            protocols=protocols.BASE_BUILD_PROTOCOLS
-        )
+        # self.settings = utils.load_settings(
+        #     os.path.join(self.path, SETTINGS_FILE),
+        #     default=self.DEFAULT_SETTINS,
+        #     protocols=protocols.BASE_BUILD_PROTOCOLS
+        # )
         self.name = self.settings['project']
         self._gordon_root = os.path.dirname(__file__)
 
@@ -286,7 +286,7 @@ class ProjectBuild(BaseProject, BaseResourceContainer):
     def _build_pre_project_template(self, output_filename="{}_pr_p.json"):
         """Collect registered hooks both for ``register_type_pre_project_template``
         and ``register_pre_project_template``"""
-        template = actions.ActionsTemplate()
+        # template = actions.ActionsTemplate()
 
         for resource_type, resource_cls in six.iteritems(AVAILABLE_RESOURCES):
             resource_cls.register_type_pre_project_template(self, template)
@@ -311,7 +311,7 @@ class ProjectBuild(BaseProject, BaseResourceContainer):
             for r in self.get_resources(resource_type):
                 r.register_project_template(template)
 
-        template = utils.fix_troposphere_references(template)
+        # template = utils.fix_troposphere_references(template)
 
         self.puts(colored.cyan(output_filename))
         with open(os.path.join(self.build_path, output_filename), 'w') as f:
@@ -320,7 +320,7 @@ class ProjectBuild(BaseProject, BaseResourceContainer):
     def _build_pre_resources_template(self, output_filename="{}_pr_r.json"):
         """Collect registered hooks both for ``register_type_pre_resources_template``
         and ``register_pre_resources_template``"""
-        template = actions.ActionsTemplate()
+        # template = actions.ActionsTemplate()
 
         for resource_type, resource_cls in six.iteritems(AVAILABLE_RESOURCES):
             resource_cls.register_type_pre_resources_template(self, template)
@@ -344,7 +344,7 @@ class ProjectBuild(BaseProject, BaseResourceContainer):
             for r in self.get_resources(resource_type):
                 r.register_resources_template(template)
 
-        template = utils.fix_troposphere_references(template)
+        # template = utils.fix_troposphere_references(template)
 
         if template and template.resources:
             output_filename = output_filename.format(self._get_next_build_sequence_id())
@@ -356,7 +356,7 @@ class ProjectBuild(BaseProject, BaseResourceContainer):
         """Collect registered hooks both for ``register_type_post_resources_template``
         and ``register_post_resources_template``"""
 
-        template = actions.ActionsTemplate()
+        # template = actions.ActionsTemplate()
 
         for resource_type, resource_cls in six.iteritems(AVAILABLE_RESOURCES):
             resource_cls.register_type_post_resources_template(self, template)
@@ -379,7 +379,7 @@ class ProjectRun(ProjectBuild):
         self.lambda_friendly_name = kwargs['lambda_name']
 
     def run(self):
-        grn = utils.lambda_friendly_name_to_grn(self.lambda_friendly_name).rsplit(':', 1)[0]
+        # grn = utils.lambda_friendly_name_to_grn(self.lambda_friendly_name).rsplit(':', 1)[0]
         lambdas = [l for l in self.get_resources('lambdas') if l.in_project_name == grn]
         # if not lambdas:
         #     raise exceptions.LambdaNotFound(self.lambda_friendly_name)
@@ -392,7 +392,7 @@ class ProjectApplyLoopBase(BaseProject):
         super(ProjectApplyLoopBase, self).__init__(*args, **kwargs)
         self.stage = kwargs.pop('stage', None)
         self.timeout_in_minutes = kwargs.pop('timeout_in_minutes', 15)
-        self.region = utils.setup_region(kwargs.pop('region', None), self.settings)
+        # self.region = utils.setup_region(kwargs.pop('region', None), self.settings)
         if self.region not in AWS_LAMBDA_REGIONS:
             self.puts(
                 colored.yellow(
@@ -478,43 +478,43 @@ class ProjectApply(ProjectApplyLoopBase):
             'env': os.environ
         }
 
-        for path in parameters_paths:
-            if os.path.exists(path):
-                params = utils.convert_cloudformation_types(
-                    utils.load_settings(
-                        path,
-                        jinja2_enrich=True,
-                        protocols=protocols.BASE_APPLY_PROTOCOLS,
-                        context=context
-                    )
-                )
-                parameters.update(params)
+        # for path in parameters_paths:
+            # if os.path.exists(path):
+                # params = utils.convert_cloudformation_types(
+                #     utils.load_settings(
+                #         path,
+                #         jinja2_enrich=True,
+                #         protocols=protocols.BASE_APPLY_PROTOCOLS,
+                #         context=context
+                #     )
+                # )
+                # parameters.update(params)
 
         return parameters
 
     def apply_custom_template(self, name, filename, context):
         """Apply ``filename`` template with ``context``-"""
-        with open(os.path.join(self.build_path, filename), 'r') as f:
-            template = actions.ActionsTemplate.from_dict(json.loads(f.read()))
+        # with open(os.path.join(self.build_path, filename), 'r') as f:
+            # template = actions.ActionsTemplate.from_dict(json.loads(f.read()))
 
         outputs = template.apply(context, self)
 
         for key, value in six.iteritems(outputs):
             context[key] = value
 
-    def apply_cloudformation_template(self, name, filename, context):
-        """Apply ``filename`` template with ``context``-"""
-        stack_name = utils.generate_stack_name(context['Stage'], self.name, name)
-        stack = utils.create_or_update_cf_stack(
-            name=stack_name,
-            template_filename=os.path.join(self.build_path, filename),
-            context=context,
-            timeout_in_minutes=self.timeout_in_minutes,
-            bucket=context.get('CodeBucket')
-        )
+    # def apply_cloudformation_template(self, name, filename, context):
+    #     """Apply ``filename`` template with ``context``-"""
+    #     stack_name = utils.generate_stack_name(context['Stage'], self.name, name)
+    #     stack = utils.create_or_update_cf_stack(
+    #         name=stack_name,
+    #         template_filename=os.path.join(self.build_path, filename),
+    #         context=context,
+    #         timeout_in_minutes=self.timeout_in_minutes,
+    #         bucket=context.get('CodeBucket')
+    #     )
 
-        for output in stack.get('Outputs', []):
-            context[output['OutputKey']] = output['OutputValue']
+    #     for output in stack.get('Outputs', []):
+    #         context[output['OutputKey']] = output['OutputValue']
 
 
 class ProjectDelete(ProjectApplyLoopBase):
@@ -561,13 +561,13 @@ class ProjectDelete(ProjectApplyLoopBase):
         """
         pass
 
-    def delete_cloudformation_template(self, name, filename, context):
-        """Delete ``filename`` template with ``context``-"""
-        stack_name = utils.generate_stack_name(context['Stage'], self.name, name)
-        utils.delete_cf_stack(
-            name=stack_name,
-            dry_run=self.dry_run
-        )
+    # def delete_cloudformation_template(self, name, filename, context):
+    #     """Delete ``filename`` template with ``context``-"""
+    #     stack_name = utils.generate_stack_name(context['Stage'], self.name, name)
+    #     utils.delete_cf_stack(
+    #         name=stack_name,
+    #         dry_run=self.dry_run
+    #     )
 
 
 class Bootstrap(object):
@@ -583,7 +583,7 @@ class Bootstrap(object):
 
     def __init__(self, path, **kwargs):
         self.path = path
-        self.region = utils.setup_region(kwargs.pop('region', None))
+        # self.region = utils.setup_region(kwargs.pop('region', None))
         self.project_name = self._clean_name(kwargs.pop('project_name', ''))
         self.app_name = self._clean_name(kwargs.pop('app_name', ''))
         self.runtime = kwargs.pop('runtime', None)
