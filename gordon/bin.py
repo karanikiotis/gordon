@@ -8,7 +8,6 @@ from clint.textui import colored, puts
 from .core import Bootstrap, ProjectBuild, ProjectApply, ProjectDelete, ProjectRun
 from .exceptions import BaseGordonException
 
-
 def stage_validator(s):
     """Stage names must be between 2 and 16 characters long."""
     if re.match(r'^[a-z0-9\-]{2,16}$', s):
