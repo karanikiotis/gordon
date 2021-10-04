@@ -14,7 +14,7 @@ import troposphere
 from clint.textui import colored, puts, indent
 from botocore.exceptions import ClientError
 
-from . import exceptions
+# from . import exceptions
 from . import utils
 from . import actions
 from . import resources
@@ -96,8 +96,8 @@ class App(BaseResourceContainer):
         self.name = name
         self.project = project
         self.path = path or os.path.join(self.project.path, name)
-        if not os.path.exists(self.path):
-            raise exceptions.AppNotFoundError(self.name, self.path)
+        # if not os.path.exists(self.path):
+        #     raise exceptions.AppNotFoundError(self.name, self.path)
         self.settings = utils.load_settings(
             os.path.join(self.path, SETTINGS_FILE),
             default=self.DEFAULT_SETTINS,
@@ -187,8 +187,8 @@ class ProjectBuild(BaseProject, BaseResourceContainer):
             elif isinstance(application, dict):
                 application_name = application.keys()[0]
                 settings = application.values()[0]
-            else:
-                raise exceptions.InvalidAppFormatError(application)
+            # else:
+            #     raise exceptions.InvalidAppFormatError(application)
 
             with indent(2):
                 self.puts(colored.cyan("{}:".format(application_name)))
@@ -203,17 +203,17 @@ class ProjectBuild(BaseProject, BaseResourceContainer):
             )
 
     def add_application(self, new_app):
-        for app in self.applications:
-            if app.name == new_app.name:
-                raise exceptions.DuplicateAppNameError(new_app.name)
+        # for app in self.applications:
+        #     if app.name == new_app.name:
+        #         raise exceptions.DuplicateAppNameError(new_app.name)
         self.applications.append(new_app)
 
     def register_resource_reference(self, name, cf_name, resource):
         """Register a resouce called ``name`` as ``cf_name``"""
-        if name in self._in_project_resource_references or \
-           name in self._in_project_cf_resource_references or \
-           cf_name in self._in_project_cf_resource_references.values():
-            raise exceptions.DuplicateResourceNameError(name, cf_name)
+        # if name in self._in_project_resource_references or \
+        #    name in self._in_project_cf_resource_references or \
+        #    cf_name in self._in_project_cf_resource_references.values():
+        #     raise exceptions.DuplicateResourceNameError(name, cf_name)
 
         self._in_project_cf_resource_references[name] = cf_name
         self._in_project_resource_references[name] = resource
@@ -222,7 +222,7 @@ class ProjectBuild(BaseProject, BaseResourceContainer):
         """Resolve ``name`` as a CloudFormation reference"""
         if name in self._in_project_cf_resource_references:
             return self._in_project_cf_resource_references[name]
-        raise exceptions.ResourceNotFoundError(name, self._in_project_cf_resource_references.keys())
+        # raise exceptions.ResourceNotFoundError(name, self._in_project_cf_resource_references.keys())
 
     def get_resources(self, resource_type=None):
         """Returns all project and application resources"""
@@ -236,7 +236,7 @@ class ProjectBuild(BaseProject, BaseResourceContainer):
     def get_resource(self, grn):
         if grn in self._in_project_resource_references:
             return self._in_project_resource_references[grn]
-        raise exceptions.ResourceNotFoundError(grn, self._in_project_resource_references.keys())
+        # raise exceptions.ResourceNotFoundError(grn, self._in_project_resource_references.keys())
 
     def build(self):
         """Build current current project"""
@@ -381,8 +381,8 @@ class ProjectRun(ProjectBuild):
     def run(self):
         grn = utils.lambda_friendly_name_to_grn(self.lambda_friendly_name).rsplit(':', 1)[0]
         lambdas = [l for l in self.get_resources('lambdas') if l.in_project_name == grn]
-        if not lambdas:
-            raise exceptions.LambdaNotFound(self.lambda_friendly_name)
+        # if not lambdas:
+        #     raise exceptions.LambdaNotFound(self.lambda_friendly_name)
         lambdas[0].collect_and_run(stdin=self.stdin)
 
 
@@ -409,8 +409,8 @@ class ProjectApplyLoopBase(BaseProject):
         them. Use the output of each of them to populate the context of the
         subsequent templates."""
 
-        if not os.path.exists(self.build_path):
-            raise exceptions.ProjectNotBuildError()
+        # if not os.path.exists(self.build_path):
+        #     raise exceptions.ProjectNotBuildError()
 
         steps = []
         for filename in os.listdir(self.build_path):
@@ -598,10 +598,10 @@ class Bootstrap(object):
         """Create a new project called ``project_name``."""
 
         path = os.path.join(self.path, self.project_name)
-        if os.path.exists(path):
-            raise exceptions.ProjectDirectoryAlreadyExistsError(self.project_name)
-        else:
-            os.makedirs(path)
+        # if os.path.exists(path):
+        #     raise exceptions.ProjectDirectoryAlreadyExistsError(self.project_name)
+        # else:
+        os.makedirs(path)
 
         context = {
             'project_name': self.project_name,
@@ -619,10 +619,10 @@ class Bootstrap(object):
         """Create a new application called ``app_name``."""
 
         path = os.path.join(self.path, self.app_name)
-        if os.path.exists(path):
-            raise exceptions.AppDirectoryAlreadyExistsError(self.app_name)
-        else:
-            os.makedirs(path)
+        # if os.path.exists(path):
+        #     raise exceptions.AppDirectoryAlreadyExistsError(self.app_name)
+        # else:
+        os.makedirs(path)
 
         context = {
             'app_name': self.app_name,
