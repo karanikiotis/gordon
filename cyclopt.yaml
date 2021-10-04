@@ -1,6 +1,8 @@
 meta: # These apply to every branch
   languages:
     - Python
+  branches_exclude:
+    - develop
   paths_exclude:
     - vendors/**
   metrics:
