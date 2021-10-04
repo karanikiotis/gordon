@@ -1,0 +1,20 @@
+meta: # These apply to every branch
+  languages:
+    - Python
+  branches_exclude:
+    - develop
+  paths_exclude:
+    - vendors/**
+  metrics:
+    ignore:
+      - ESCOMP_MI
+context: # Optionally, you can edit some keys for a specific branch. These are merged with the above
+  develop: # Branch develop
+    paths_exclude:
+      - dev-tools/** # Exclude vendors/** (from meta) and dev-tools/**
+    metrics:
+      ignore:
+        - SOME_METRIC
+  docs: # Branch develop
+    paths_exclude:
+      - "!vendors/**" # Exclude vendors/** (from meta) and !vendors/** => exclude nothing
